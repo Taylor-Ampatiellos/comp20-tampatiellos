@@ -58,9 +58,11 @@
           							infowindow.open(map, userMarker);
        							}
       							})(username, distance));
-
 	        }
 
+	        // Requests and parses JSON data.
+	        // Determines if the user is a passenger or vehicle.
+	        // Places markers using retrieved data.
 	        function getData() {
 	        	request = new XMLHttpRequest();
 	            request.open('POST', "https://jordan-marsh.herokuapp.com/rides", true);
@@ -83,7 +85,6 @@
 		                }
 
 		                data_length = data[dataType].length;  
-
 		                var distanceArr = [];     
 
 		                // For every element in the vehicles/passengers list, generate a marker and 
@@ -110,7 +111,6 @@
       							})(marker, count));
 		                }
 
-		                
 		                addUserInfo(Math.min(...distanceArr)); 	
 	         		}
 	      		};
