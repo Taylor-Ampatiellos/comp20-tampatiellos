@@ -28,31 +28,33 @@
         <script>
 	        var username = "ZUgb1RBuV8";
 	      	var and = "&";
-	      	var latitude = 0.00;
-	      	var longitude = 0.00;
+	      	var mylat;
+	      	var mylng;
+	      	var mypos;
 	      	var request = new XMLHttpRequest();
 	      	var map;
 
 	        function getLocation() {
 	        	navigator.geolocation.getCurrentPosition(function(somePos) {
-	        		latitude = somePos.coords.latitude;
-					longitude = somePos.coords.longitude;
+	        		mylat = somePos.coords.latitude;
+					mylng = somePos.coords.longitude;
+					mypos = new google.maps.LatLng(mylat, mylng);
 					initMap();
 					addMyInfo();
-					getData();
+					addData();
 				});
 	        }
 
 	        function initMap() {
 	            map = new google.maps.Map(document.getElementById('map'), {
-	            center: {lat: latitude, lng: longitude},
+	            center: mypos,
 	            zoom: 17
 	            });
 	        }
 
 	        function addMyInfo() {
 	        	var myMarker = new google.maps.Marker({
-					position: {lat: latitude, lng: longitude},
+					position: mypos,
 					map: map,
 					animation: google.maps.Animation.DROP,
 					title: "JanetKinsey",
@@ -61,7 +63,7 @@
 
 	        }
 
-	        function getData() {
+	        function addData() {
 	            console.log("Start of getData");
 	            request.open('POST', "https://jordan-marsh.herokuapp.com/rides", true);
 	            request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
@@ -77,18 +79,23 @@
 
 		                var count;
 		                var marker;
-		                var infowindow = new google.maps.InfoWindow();
+		                var infowindow;
+		                var distance;
 
 		                for (count = 0; count < vdata_length; count++) {
-		                    marker = new google.maps.Marker({
+		                	marker = new google.maps.Marker({
        								 position: {lat: vdata['vehicles'][count].lat, lng: vdata['vehicles'][count].lng},
        								 map: map,
-       								 icon: {url: 'car.png', scaledSize: new google.maps.Size(30, 30)}
+       								 icon: 'car.png'
        								 });
 
-		                    google.maps.event.addListener(marker, 'click', (function(marker, i) {
+		                    infowindow = new google.maps.InfoWindow();
+
+		                    google.maps.event.addListener(marker, 'click', (function(marker, count) {
         						return function() {
-          							infowindow.setContent("HELLO");
+        							distance = google.maps.geometry.spherical.computeDistanceBetween(marker.position, mypos)/1609.344;
+          							infowindow.setContent('<div>' + 'Username: ' + vdata['vehicles'][count].username + '<br>' +
+                										  'Miles Away: ' + distance.toString() + '</div>');
           							infowindow.open(map, marker);
        							}
       							})(marker, count));
@@ -99,14 +106,14 @@
 	      		};
 
 	      		stringStart = "username="
-	      		sendString = stringStart.concat(username, and, "lat=", latitude.toString(), and, "lng=", longitude.toString());
+	      		sendString = stringStart.concat(username, and, "lat=", mylat.toString(), and, "lng=", mylng.toString());
 	      		console.log(sendString);
 	      		request.send(sendString);
 	      	}
 	      
     	</script>
 
-    	<script src="https://maps.googleapis.com/maps/api/js?&callback=getLocation"
+    	<script src="https://maps.googleapis.com/maps/api/js?libraries=geometry&callback=getLocation"
     	async defer></script>
    
   	</body>
