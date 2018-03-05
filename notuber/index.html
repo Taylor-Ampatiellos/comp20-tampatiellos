@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Simple Map</title>
+        <title>Not Uber</title>
         <meta name="viewport" content="initial-scale=1.0">
         <meta charset="utf-8">
 
@@ -20,100 +20,121 @@
         </style>
      </head>
     <body>
-    	
         <div id="map"></div>
-        <div id="location"></div>
-    	<div id="list"></div>
 
         <script>
+        	var dataType;
+        	var userIcon;
+        	var othersIcon;
 	        var username = "ZUgb1RBuV8";
-	      	var and = "&";
-	      	var mylat;
-	      	var mylng;
-	      	var mypos;
-	      	var request = new XMLHttpRequest();
+	      	var userLat;
+	      	var userLng;
+	      	var userPos;
 	      	var map;
 
-	        function getLocation() {
+	      	// Determines the user's location, calls map initializer and
+	      	// data-parsing function
+	      	function getUserLocation() {
 	        	navigator.geolocation.getCurrentPosition(function(somePos) {
-	        		mylat = somePos.coords.latitude;
-					mylng = somePos.coords.longitude;
-					mypos = new google.maps.LatLng(mylat, mylng);
+	        		userLat = somePos.coords.latitude;
+					userLng = somePos.coords.longitude;
+					userPos = new google.maps.LatLng(userLat, userLng);
 					initMap();
-					addMyInfo();
-					addData();
+					getData();
 				});
 	        }
 
+	        // Initializes the map, centers it to the user's location
 	        function initMap() {
 	            map = new google.maps.Map(document.getElementById('map'), {
-	            center: mypos,
+	            center: userPos,
 	            zoom: 17
 	            });
 	        }
 
-	        function addMyInfo() {
-	        	var myMarker = new google.maps.Marker({
-					position: mypos,
+	        // Adds a marker (and associated info window) for the user
+	        function addUserInfo(distance) {
+	        	userMarker = new google.maps.Marker({
+					position: userPos,
 					map: map,
 					animation: google.maps.Animation.DROP,
-					title: "JanetKinsey",
-					icon: {url: 'me.jpg', scaledSize: new google.maps.Size(20, 20)}
+					icon: userIcon
 				});
+
+				infowindow = new google.maps.InfoWindow();
+
+				google.maps.event.addListener(userMarker, 'click', (function(username, distance) {
+        						return function() {
+        							infowindow.setContent('<div>' + 'Username: ' + username + '<br>' +
+                										  'Miles from nearest ' + dataType.substring(0, dataType.length - 1) + 
+                										  ": " + distance.toString() + '</div>');
+          							infowindow.open(map, userMarker);
+       							}
+      							})(username, distance));
 
 	        }
 
-	        function addData() {
-	            console.log("Start of getData");
+	        function getData() {
+	        	request = new XMLHttpRequest();
 	            request.open('POST', "https://jordan-marsh.herokuapp.com/rides", true);
 	            request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 
 	            request.onreadystatechange = function() {
 	                if (request.readyState == 4 && request.status == 200) {
-		                outputDiv = document.getElementById("list");
+		                response = request.responseText;       
+		                data = JSON.parse(response);
 
-		                vresponse = request.responseText;       
+		                // Determines whether the given list of data is of passengers or vehicles
+		                if (data ['passengers'] == null) {
+		                	dataType = 'vehicles';
+		                	userIcon = {url: 'me.jpg', scaledSize: new google.maps.Size(20, 20)};
+		                	othersIcon = 'car.png';
+		                } else {
+		                	dataType = 'passengers';
+		                	userIcon = 'car.png';
+		                	othersIcon = {url: 'me.jpg', scaledSize: new google.maps.Size(20, 20)};
+		                }
 
-		                vdata = JSON.parse(vresponse);
-		                vdata_length = vdata['vehicles'].length;
+		                data_length = data[dataType].length;  
 
-		                var count;
-		                var marker;
-		                var infowindow;
-		                var distance;
+		                var distanceArr = [];     
 
-		                for (count = 0; count < vdata_length; count++) {
+		                // For every element in the vehicles/passengers list, generate a marker and 
+		                // associated infowindow (which details username and distance away in miles)
+		                for (count = 0; count < data_length; count++) {
 		                	marker = new google.maps.Marker({
-       								 position: {lat: vdata['vehicles'][count].lat, lng: vdata['vehicles'][count].lng},
+       								 position: {lat: data[dataType][count].lat, lng: data[dataType][count].lng},
        								 map: map,
-       								 icon: 'car.png'
+       								 icon: othersIcon
        								 });
 
 		                    infowindow = new google.maps.InfoWindow();
 
+		                    distance = google.maps.geometry.spherical.computeDistanceBetween(marker.position, userPos)/1609.344;
+		                    distanceArr.push(distance);
+
 		                    google.maps.event.addListener(marker, 'click', (function(marker, count) {
         						return function() {
-        							distance = google.maps.geometry.spherical.computeDistanceBetween(marker.position, mypos)/1609.344;
-          							infowindow.setContent('<div>' + 'Username: ' + vdata['vehicles'][count].username + '<br>' +
+        							distance = google.maps.geometry.spherical.computeDistanceBetween(marker.position, userPos)/1609.344;
+          							infowindow.setContent('<div>' + 'Username: ' + data[dataType][count].username + '<br>' +
                 										  'Miles Away: ' + distance.toString() + '</div>');
           							infowindow.open(map, marker);
        							}
       							})(marker, count));
 		                }
 
-		            	
+		                
+		                addUserInfo(Math.min(...distanceArr)); 	
 	         		}
 	      		};
 
-	      		stringStart = "username="
-	      		sendString = stringStart.concat(username, and, "lat=", mylat.toString(), and, "lng=", mylng.toString());
-	      		console.log(sendString);
+	      		sendString = "username=" + username + "&lat=" + userLat.toString() + "&lng=" + userLng.toString();
 	      		request.send(sendString);
 	      	}
 	      
     	</script>
 
-    	<script src="https://maps.googleapis.com/maps/api/js?libraries=geometry&callback=getLocation"
+    	<script src="https://maps.googleapis.com/maps/api/js?libraries=geometry&callback=getUserLocation"
     	async defer></script>
    
   	</body>
