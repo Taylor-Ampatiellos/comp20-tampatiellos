@@ -9,12 +9,13 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script>
         $(document).ready(function() {
-            $("#log").append(localStorage.getItem('entry'));
+            // upon loading the page, retrieve all entries from local storage.
+            // call getEntry function to receive new entries.
+            $("#log").append(localStorage.getItem('entries'));
             getEntry();
         })
 
         function getEntry() {
-
             $('#msg').keydown(function(e) {
                 // detect if 'enter' has been pressed
                 if (e.keyCode == 13) {
@@ -24,11 +25,18 @@
                         var entry = "<p>" + entryDate + " - " + $("#msg").val() + "</p>"
                         $("#log").prepend(entry);
 
-                        // add entry to stored entries
-                        var allEntries = entry + "" + localStorage.getItem('entry');
-                        localStorage.setItem('entry', allEntries);
+                        // add entry to stored entries.
+                        // first check if localStorage item is null, to avoid 
+                        // adding null entry to stored entries
+                        if (localStorage.getItem('entries') != null) {
+                            var storedEntries = entry + "" + localStorage.getItem('entries');
+                        } else {
+                            var storedEntries = entry;
+                        }
 
-                        // reset entry window
+                        localStorage.setItem('entries', storedEntries);
+                        
+                        // reset entry window; make room for next input
                         $("#msg").val("");
                     }
                 }
