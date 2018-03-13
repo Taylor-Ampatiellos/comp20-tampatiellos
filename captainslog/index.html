@@ -5,11 +5,11 @@
 <head>
     <meta charset="utf-8" />
     <title>Captain's Log</title>
-    <!-- <link rel="stylesheet" href="style.css" /> -->
+    <link rel="stylesheet" href="style.css" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script>
         $(document).ready(function() {
-            // upon loading the page, retrieve all entries from local storage.
+            // upon loading the page, retrieve entries from local storage.
             // call getEntry function to receive new entries.
             $("#log").append(localStorage.getItem('entries'));
             getEntry();
@@ -29,7 +29,7 @@
                         // first check if localStorage item is null, to avoid 
                         // adding null entry to stored entries
                         if (localStorage.getItem('entries') != null) {
-                            var storedEntries = entry + "" + localStorage.getItem('entries');
+                            var storedEntries = entry + localStorage.getItem('entries');
                         } else {
                             var storedEntries = entry;
                         }
