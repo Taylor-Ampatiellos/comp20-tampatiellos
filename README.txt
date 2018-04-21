@@ -2,12 +2,13 @@ Lab: Finalizing Your Learning Portfolio
 Creator: Taylor Ampatiellos
 
 1. The purpose of this Git repository, per the name of this last lab, is to exist as a learning portfolio.
-   A portfolio that not only showcases what I have learned over the course of Comp20, but can also be a great
-   resource for future projects expanding upon said material.
+   A portfolio that not only showcases what I have learned over the course of Comp20, but can also be a 
+   great resource for future projects expanding upon said material.
 2. My favorite assignment was Assignment 2, creating the front-end for the ride-sharing service. 
    Not only was it one of the more involved assignments, but it was great to work on something that felt so
    close to its real-world counterpart.
-3. I think I have grown significantly since day 1, as I knew nothing about web programming before this course.
+3. I think I have grown significantly since day 1, as I knew nothing about web programming 
+   before this course.
 4. The most important thing that I have learned in this class is responsive design. 
    In this day and age, with so many different internet-capable devices out there, 
    it is important to make sure that all phones/tablets/computers display your 
