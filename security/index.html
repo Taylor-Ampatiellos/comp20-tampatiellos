@@ -1,0 +1,100 @@
+<!doctype html>
+<html>
+	<head>
+		<title>Assignment 4 Writeup</title>
+		<meta charset="utf-8"/>
+		<link href="indexStyle.css" rel="stylesheet" />
+	</head>
+
+	<body>		
+		<h1>Introduction:</h1>
+		<p>I was hired to perform a security analysis on a prototype ride-sharing platform created by Ming Chow.
+		   This included both penetration testing and a general analysis of site structure/output.</p>
+
+		<h1>Methodology:</h1>
+		<p>Considering the simplicity/insecurity of the provided product, I felt it unneccessary to use
+		    complex tools, instead opting to use curl, the Chrome browser, and the product's source code 
+		    to test for common vulnerabilities.</p>
+
+		<h1>Findings:</h1>
+		<p>This product is extremely insecure. Not only is valuable user information stored and displayed
+			in a highly visible/accessible manner, but the site itself can be edited by third-parties
+			to an alarming extent. These edits can range from mundane annoyances to implementation
+			of malicious scripts.</p>
+
+		<h1>Specific Issues Found:</h1>
+			<OL>
+				<LI>Cross-Site Scripting
+					<UL>
+						<LI>Location: https://jordan-marsh.herokuapp.com/rides
+						<LI>Severity: High
+						<LI>Description: External scripts can be hard-coded into the site through posting
+										 to the /rides API. <br>
+										 Although in my testing the scripts I implemented were rather benign (some
+										 simple-but-annoying pop-up windows), XSS of this nature
+										 can be used maliciously to attack users, 
+										 redirect traffic, or even mine Bitcoin for a third-party.
+						<LI>Proof: The image below is the result of this single input in Git Bash using curl: <br>	
+									curl --data "username=&lt;script> alert('HELP IVE BEEN ABDUCTED BY ALIENS') &lt;/script>&lat=10&lng=10" https://jordan-marsh.herokuapp.com/rides <br>
+									<img src="images/abduction.png" alt="Funny Alert Message" width="1200">
+						<LI>Resolution: This vulnerability can be easily prevented by sanitizing inputs and ensuring that no
+										malicious code is being provided as input.
+										Also, although it has not been detailed in this report as a specific issue due to being a "weak" vulnerability, 
+										using similar methods as shown above HTML injection can also be performed on 
+										the page. These injections can also be prevented using sanitization. <br>
+										Example of HTML injection: <br>
+										<img src="images/hacked.png" alt="Hacker Image from HTML Injection" width="1200">
+
+					</UL>
+				
+				<br>
+				
+				<LI>Database Injection
+					<UL>
+						<LI>Location: https://jordan-marsh.herokuapp.com/vehicle.json
+						<LI>Severity: High
+						<LI>Description: The most alarming thing about this vulnerability is that it can be
+				 							exploited in-browser. Through using certain commands as the 
+				 							query in the URL, valuable information stored in the database can
+				 							be output to the user. More specifically, by using 'username[$ne]=JANET'
+				 							as the query, data is returned to the user for which the username
+				 							is NOT 'JANET'. Although in this case only one data entry is returned
+				 							at a time, a script could easily be written to access every data entry.
+						<LI>Proof: The image below is the result of accessing the URL above using a database injection query: <br>
+									https://jordan-marsh.herokuapp.com/vehicle.json?username[$ne]=JANET <br>
+									<img src="images/data_inj.png" alt="Database Injection Example" width="1200">
+						<LI>Resolution: Once again, this vulnerability can be prevented through sanitizing inputs,
+										ensuring that querys do not contain characters/strings used for injection attacks.
+					</UL>
+				
+				<br>
+				
+				<LI>Bad Programming Practice — Displaying User Info
+					<UL>
+						<LI>Location: https://jordan-marsh.herokuapp.com/
+						<LI>Severity: Medium
+						<LI>Description: Upon visiting the URL above, the user is greeted with a list of
+											all passengers in the database in descending order by timestamp.
+											While simply displaying usernames would not be an egregious breach
+											of valuable user data, also displayed with these usernames
+											is the user's location as of their last vehicle request. This data
+											is completely unneccesary to share, and could be used maliciously.
+						<LI>Proof: The image below is example output from https://jordan-marsh.herokuapp.com/<br>
+									<img src="images/list.png" alt="Database Injection Example" width="600">
+						<LI>Resolution: Keep this user data private! There is no need to display such valuable 
+										information for all to see. The only time a passenger's location should 
+										be displayed is when they are requesting a ride, and this information
+										should only be given to the single vehicle which will be picking them up.
+					</UL>
+			</OL>
+
+		<h1>Conclusion:</h1>
+		<p>As stated above, this product is extremely insecure. Before continuing to expand this 
+		   product's capabilities, the creator should focus on both a restructuring of how data is displayed
+		   and an increase in security measures to ensure that internal data is secure and the site itself
+		   cannot be injected with scripts.</p>
+
+		<h1>References:</h1>
+		<p>Course Notes</p>
+	</body>
+</html>
